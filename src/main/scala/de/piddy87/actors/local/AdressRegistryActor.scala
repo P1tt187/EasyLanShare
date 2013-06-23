@@ -5,13 +5,16 @@ import java.net.InetAddress
 import de.piddy87.actors.messages.LanShareMessage
 import de.piddy87.actors.messages.AddAdress
 import de.piddy87.actors.messages.RemoveAdress
+import akka.event.Logging
 
 class AdressRegistryActor extends Actor {
 
   private var adresses: Set[InetAddress] = Set[InetAddress]()
+  private val log = Logging(context.system, this)
 
   override def preStart {
-    println(self.path)
+    log.debug(self.path.toString())
+    
   }
   
   def receive = {
@@ -19,8 +22,10 @@ class AdressRegistryActor extends Actor {
       m match {
         case AddAdress(adress) =>
           adresses += adress
-          println("add adress: " + adress)
-        case RemoveAdress(adress) => adresses -= adress
+          log.debug("add adress: " + adress)
+        case RemoveAdress(adress) =>
+          log.debug("remove adress: " + adress)
+          adresses -= adress
       }
     case _ =>
   }

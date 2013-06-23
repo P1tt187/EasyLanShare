@@ -13,7 +13,7 @@ import de.piddy87.actors.messages.AddAdress
 import java.net.NetworkInterface
 import scala.collection.JavaConversions._
 import java.net.Inet4Address
-import de.piddy87.actors.messages.AddAdress
+import akka.event.Logging
 
 class NetworkGreetActor extends Actor {
 
@@ -25,14 +25,16 @@ class NetworkGreetActor extends Actor {
 
   private val MULTICAST_ADRESS = InetAddress.getByName("224.0.0.1")
 
+  private val log = Logging(context.system, this)
+
   override def preStart {
-    println(self.path)
+    log.debug("starting")
     self ! StartGreet
   }
 
   def receive = {
     case StartGreet =>
-      println(StartGreet)
+      log.debug(StartGreet.toString)
       greet
     case PoisonPill =>
       Thread.currentThread().interrupt()
@@ -71,7 +73,7 @@ class NetworkGreetActor extends Actor {
           case PONG_MESSAGE =>
         }
 
-        println("greetings from: " + response.getAddress())
+        log.debug("greetings from: " + response.getAddress())
 
         context.actorFor("akka://ShareSystem/user/AdressRegistryActor") ! AddAdress(response.getAddress())
 
