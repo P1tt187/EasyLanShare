@@ -14,16 +14,20 @@ import com.typesafe.config.ConfigFactory
  *
  */
 object EasyLanShareApp extends App {
-  
-  val config = ConfigFactory.load()
 
-  val actorSystem = ActorSystem("ShareSystem",config.getConfig("akka").withFallback(config))
+  val ADRESS_REGISTRY_NAME = "AdressRegistryActor"
+  val ACTOR_SYSTEM_NAME = "ShareSystem"
+  val ACTOR_REGISTRY_ACTOR_ADRESS = "akka://" + ACTOR_SYSTEM_NAME + "/user/" + ADRESS_REGISTRY_NAME
+
+  private val config = ConfigFactory.load()
+
+  private val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME, config.getConfig("akka").withFallback(config))
   //actorSystem.logConfiguration
 
-  val adressRegistry = actorSystem.actorOf(Props[AdressRegistryActor],"AdressRegistryActor")
+  private val adressRegistry = actorSystem.actorOf(Props[AdressRegistryActor], ADRESS_REGISTRY_NAME)
   actorSystem.actorOf(Props[NetworkGreetActor])
   //println(adressRegistry.toString)
 
- // actorSystem shutdown
+  // actorSystem shutdown
 
 }

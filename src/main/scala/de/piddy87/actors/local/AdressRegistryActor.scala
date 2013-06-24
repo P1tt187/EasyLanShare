@@ -6,6 +6,7 @@ import de.piddy87.actors.messages.LanShareMessage
 import de.piddy87.actors.messages.AddAdress
 import de.piddy87.actors.messages.RemoveAdress
 import akka.event.Logging
+import de.piddy87.actors.messages.Adresses
 
 class AdressRegistryActor extends Actor {
 
@@ -14,9 +15,9 @@ class AdressRegistryActor extends Actor {
 
   override def preStart {
     log.debug(self.path.toString())
-    
+
   }
-  
+
   def receive = {
     case m: LanShareMessage =>
       m match {
@@ -26,8 +27,12 @@ class AdressRegistryActor extends Actor {
         case RemoveAdress(adress) =>
           log.debug("remove adress: " + adress)
           adresses -= adress
+
+        case Adresses => sender ! Adresses(adresses)
+
+        case other => log.error("uh oh, want " + classOf[LanShareMessage].getSimpleName + " but got " + other)
       }
-    case _ =>
+
   }
 
 }

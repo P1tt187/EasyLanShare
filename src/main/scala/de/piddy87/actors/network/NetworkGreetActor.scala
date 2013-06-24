@@ -2,6 +2,7 @@ package de.piddy87.actors.network
 
 import akka.actor.Actor
 import akka.actor.Actor._
+import de.piddy87.main.EasyLanShareApp
 import java.net.MulticastSocket
 import java.net.InetAddress
 import java.net.DatagramPacket
@@ -75,11 +76,13 @@ class NetworkGreetActor extends Actor {
 
         log.debug("greetings from: " + response.getAddress())
 
-        context.actorFor("akka://ShareSystem/user/AdressRegistryActor") ! AddAdress(response.getAddress())
+        context.actorFor(EasyLanShareApp.ACTOR_REGISTRY_ACTOR_ADRESS) ! AddAdress(response.getAddress())
 
       }
     } catch {
-      case t => t.printStackTrace()
+      case t: Throwable =>
+        t.printStackTrace()
+        self ! StartGreet
     }
 
   }
