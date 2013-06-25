@@ -13,13 +13,14 @@ import de.piddy87.actors.messages.Pong
 import de.piddy87.actors.messages.RemoveAdress
 
 object PingPongActor {
+  
   val PING_PONG_ACTOR_NAME = "PingPongActor"
-  val DEFAULT_REMOTE_PORT: Int = 2552
+  
+  val DEFAULT_REMOTE_PORT = 2552
+  
 }
 
 class PingPongActor extends Actor {
-
-  
 
   private val log = Logging(context.system, this)
   private val actorRegisty = context.actorFor(EasyLanShareApp.ACTOR_REGISTRY_ACTOR_ADRESS)
@@ -37,16 +38,21 @@ class PingPongActor extends Actor {
         case Adresses(adresses) => adresses.par.foreach {
           element =>
             val ipAdress = element.getHostName()
-            val selection = context.actorFor("akka://"
-              + EasyLanShareApp.ACTOR_SYSTEM_NAME + "@" + ipAdress + ":"
-              + PingPongActor.DEFAULT_REMOTE_PORT + "/user/" + PingPongActor.PING_PONG_ACTOR_NAME)
+
+            val lookup = "akka://" +
+              EasyLanShareApp.ACTOR_SYSTEM_NAME + "@" + ipAdress + ":" +
+              PingPongActor.DEFAULT_REMOTE_PORT + "/user/" + PingPongActor.PING_PONG_ACTOR_NAME
+
+            log.debug(lookup)
+
+            val selection = context.actorFor(lookup)
 
             Await.result(selection ? Ping, timeout.duration) match {
-              case Pong=>
-              case Timeout=> actorRegisty!RemoveAdress(element)
+              case Pong =>
+              case Timeout => actorRegisty ! RemoveAdress(element)
             }
         }
-        case Timeout=> log.error("uh oh, timeout")
+        case Timeout => log.error("uh oh, timeout")
       }
 
     case Ping =>
