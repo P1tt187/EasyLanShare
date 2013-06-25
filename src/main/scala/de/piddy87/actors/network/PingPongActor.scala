@@ -37,7 +37,7 @@ class PingPongActor extends Actor {
         case Adresses(adresses) => adresses.par.foreach {
           element =>
             val ipAdress = element.getHostName()
-            val selection = context.actorFor("akka.tcp://"
+            val selection = context.actorFor("akka://"
               + EasyLanShareApp.ACTOR_SYSTEM_NAME + "@" + ipAdress + ":"
               + PingPongActor.DEFAULT_REMOTE_PORT + "/user/" + PingPongActor.PING_PONG_ACTOR_NAME)
 
