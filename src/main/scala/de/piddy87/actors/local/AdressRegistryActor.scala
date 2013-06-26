@@ -7,7 +7,10 @@ import de.piddy87.actors.messages.AddAdress
 import de.piddy87.actors.messages.RemoveAdress
 import akka.event.Logging
 import de.piddy87.actors.messages.Adresses
-
+/**
+ * @author fabian
+ * This Actor handles all known ip adresses 
+ * */
 class AdressRegistryActor extends Actor {
 
   private var adresses: Set[InetAddress] = Set[InetAddress]()

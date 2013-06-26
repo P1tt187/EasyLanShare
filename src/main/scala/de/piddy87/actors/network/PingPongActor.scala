@@ -11,7 +11,10 @@ import scala.concurrent.Await
 import de.piddy87.actors.messages.Ping
 import de.piddy87.actors.messages.Pong
 import de.piddy87.actors.messages.RemoveAdress
-
+/**
+ * @author fabian
+ * This class looks, if a host is lost
+ * */
 object PingPongActor {
   
   val PING_PONG_ACTOR_NAME = "PingPongActor"
