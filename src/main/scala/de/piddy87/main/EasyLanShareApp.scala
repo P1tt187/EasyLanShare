@@ -14,6 +14,7 @@ import akka.actor.{ Props, Deploy, Address, AddressFromURIString }
 import akka.remote.RemoteScope
 import akka.actor.Deploy
 import akka.remote.RemoteScope
+import java.net.InetAddress
 
 /**
  * @author fabian
@@ -31,7 +32,7 @@ object EasyLanShareApp extends App {
   //actorSystem.logConfiguration
 
   private val adressRegistry = actorSystem.actorOf(Props[AdressRegistryActor], ADRESS_REGISTRY_NAME)
-  actorSystem.actorOf(Props[PingPongActor].withDeploy(Deploy(scope = RemoteScope(Address("akka", ACTOR_SYSTEM_NAME, "127.0.0.1", PingPongActor.DEFAULT_REMOTE_PORT)))), PingPongActor.PING_PONG_ACTOR_NAME)
+  actorSystem.actorOf(Props[PingPongActor].withDeploy(Deploy(scope = RemoteScope(Address("akka", ACTOR_SYSTEM_NAME, InetAddress.getLocalHost.getHostAddress, PingPongActor.DEFAULT_REMOTE_PORT)))), PingPongActor.PING_PONG_ACTOR_NAME)
   actorSystem.actorOf(Props[NetworkGreetActor])
   //println(adressRegistry.toString)
 
