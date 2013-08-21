@@ -1,26 +1,28 @@
 package de.piddy87.actors.network
 
-import akka.actor.Actor
-import akka.pattern.ask
-import akka.event.Logging
-import de.piddy87.main.EasyLanShareApp
 import java.util.concurrent.TimeUnit
-import de.piddy87.actors.messages.Adresses
-import akka.util.Timeout
 import scala.concurrent.Await
+import akka.actor.Actor
+import akka.actor.actorRef2Scala
+import akka.event.Logging
+import akka.pattern.ask
+import akka.util.Timeout
+import de.piddy87.actors.messages.Adresses
 import de.piddy87.actors.messages.Ping
 import de.piddy87.actors.messages.Pong
 import de.piddy87.actors.messages.RemoveAdress
+import de.piddy87.main.EasyLanShareApp
+import java.util.concurrent.TimeoutException
 /**
  * @author fabian
  * This class looks, if a host is lost
- * */
+ */
 object PingPongActor {
-  
+
   val PING_PONG_ACTOR_NAME = "PingPongActor"
-  
+
   val DEFAULT_REMOTE_PORT = 2552
-  
+
 }
 
 class PingPongActor extends Actor {
@@ -49,15 +51,21 @@ class PingPongActor extends Actor {
             log.debug(lookup)
 
             val selection = context.actorFor(lookup)
+            try {
+              Await.result(selection ? Ping, timeout.duration) match {
+                case Pong =>
 
-            Await.result(selection ? Ping, timeout.duration) match {
-              case Pong =>
-              case Timeout => actorRegisty ! RemoveAdress(element)
+              }
+            } catch {
+              case t: TimeoutException =>
+                log.debug("Timeout for " + t.getMessage())
+                actorRegisty ! RemoveAdress(element)
+               
             }
         }
         case Timeout => log.error("uh oh, timeout")
       }
-
+      self ! NextStep
     case Ping =>
       sender ! Pong
       log.debug("ping from " + sender.path)
