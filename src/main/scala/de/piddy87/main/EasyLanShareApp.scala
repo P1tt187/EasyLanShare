@@ -28,20 +28,16 @@ object EasyLanShareApp extends App {
   val ACTOR_REGISTRY_ACTOR_ADRESS = "akka://" + ACTOR_SYSTEM_NAME + "/user/" + ADRESS_REGISTRY_NAME
 
   private var config = ConfigFactory.load()
-  private var host=""
+  private var host = ""
 
   //actorSystem.logConfiguration
-  NetworkInterface.getNetworkInterfaces().foreach {
+  NetworkInterface.getNetworkInterfaces().filter(!_.isLoopback()).foreach {
     element =>
-      println(element.getInetAddresses())
-      if (!element.isLoopback()) {
-        val ip4Adresses = element.getInetAddresses().filter(_.isInstanceOf[Inet4Address])
-        ip4Adresses.foreach { adress =>
-          println("akka.remote.netty.hostname=" + "\""+adress.getHostName()+"\"")
-          config = ConfigFactory.parseString("akka.remote.netty.hostname=" + "\""+adress.getHostName()+"\"").withFallback(ConfigFactory.load())
-          host=adress.getHostName()
-        }
-
+      val ip4Adresses = element.getInetAddresses().filter(_.isInstanceOf[Inet4Address])
+      ip4Adresses.foreach { adress =>
+        println("akka.remote.netty.hostname=" + "\"" + adress.getHostName() + "\"")
+        config = ConfigFactory.parseString("akka.remote.netty.hostname=" + "\"" + adress.getHostName() + "\"").withFallback(ConfigFactory.load())
+        host = adress.getHostName()
       }
   }
   private val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME, config.getConfig("akka").withFallback(config))

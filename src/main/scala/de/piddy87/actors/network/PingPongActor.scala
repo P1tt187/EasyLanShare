@@ -29,7 +29,7 @@ class PingPongActor extends Actor {
 
   private val log = Logging(context.system, this)
   private val actorRegisty = context.actorFor(EasyLanShareApp.ACTOR_REGISTRY_ACTOR_ADRESS)
-  implicit val timeout = Timeout(5, TimeUnit.SECONDS)
+  implicit val timeout = Timeout(15, TimeUnit.SECONDS)
 
   override def preStart {
     log.debug("Starting")
@@ -38,7 +38,7 @@ class PingPongActor extends Actor {
 
   def receive = {
     case NextStep =>
-      Thread.sleep(TimeUnit.MINUTES.toMillis(1))
+      Thread.sleep(TimeUnit.SECONDS.toMillis(10))
       log.debug("ask for adresses")
       Await.result(actorRegisty ? (Adresses), timeout.duration) match {
         case Adresses(adresses) =>
