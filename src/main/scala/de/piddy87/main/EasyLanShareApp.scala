@@ -15,7 +15,9 @@ import akka.actor.Props
 import akka.remote.RemoteScope
 import de.piddy87.actors.local.AdressRegistryActor
 import de.piddy87.actors.network.NetworkGreetActor
-import de.piddy87.actors.network.PingPongActor
+import de.piddy87.actors.network.PingActor
+import de.piddy87.actors.network.PongActor
+import de.piddy87.actors.network.PingActor
 
 /**
  * @author fabian
@@ -42,8 +44,8 @@ object EasyLanShareApp extends App {
   }
   private val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME, config.getConfig("akka").withFallback(config))
   private val adressRegistry = actorSystem.actorOf(Props[AdressRegistryActor], ADRESS_REGISTRY_NAME)
-  actorSystem.actorOf(Props[PingPongActor].withDeploy(Deploy(scope = RemoteScope(Address("akka", ACTOR_SYSTEM_NAME, host, PingPongActor.DEFAULT_REMOTE_PORT)))), PingPongActor.PING_PONG_ACTOR_NAME)
-
+  actorSystem.actorOf(Props[PongActor].withDeploy(Deploy(scope = RemoteScope(Address("akka", ACTOR_SYSTEM_NAME, host, PongActor.DEFAULT_REMOTE_PORT)))), PongActor.PONG_ACTOR_NAME)
+  actorSystem.actorOf(Props[PingActor])
   actorSystem.actorOf(Props[NetworkGreetActor])
   //println(adressRegistry.toString)
 
