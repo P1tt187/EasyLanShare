@@ -6,11 +6,8 @@ package de.piddy87.main
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.NetworkInterface
-
 import scala.collection.JavaConversions.enumerationAsScalaIterator
-
 import com.typesafe.config.ConfigFactory
-
 import akka.actor.ActorSystem
 import akka.actor.Address
 import akka.actor.Deploy
@@ -30,19 +27,26 @@ object EasyLanShareApp extends App {
   val ACTOR_SYSTEM_NAME = "ShareSystem"
   val ACTOR_REGISTRY_ACTOR_ADRESS = "akka://" + ACTOR_SYSTEM_NAME + "/user/" + ADRESS_REGISTRY_NAME
 
-  private val config = ConfigFactory.load()
+  private var config = ConfigFactory.load()
+  private var host=""
 
-  private val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME, config.getConfig("akka").withFallback(config))
   //actorSystem.logConfiguration
   NetworkInterface.getNetworkInterfaces().foreach {
     element =>
-      if (!element.isLoopback() && element.isInstanceOf[Inet4Address]) {
-        ActorSystem("akka.remote.netty.hostname=" + element.getInetAddresses().nextElement().getHostName())
-      }
+      println(element.getInetAddresses())
+      if (!element.isLoopback()) {
+        val ip4Adresses = element.getInetAddresses().filter(_.isInstanceOf[Inet4Address])
+        ip4Adresses.foreach { adress =>
+          println("akka.remote.netty.hostname=" + "\""+adress.getHostName()+"\"")
+          config = ConfigFactory.parseString("akka.remote.netty.hostname=" + "\""+adress.getHostName()+"\"").withFallback(ConfigFactory.load())
+          host=adress.getHostName()
+        }
 
+      }
   }
+  private val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME, config.getConfig("akka").withFallback(config))
   private val adressRegistry = actorSystem.actorOf(Props[AdressRegistryActor], ADRESS_REGISTRY_NAME)
-  actorSystem.actorOf(Props[PingPongActor].withDeploy(Deploy(scope = RemoteScope(Address("akka", ACTOR_SYSTEM_NAME, InetAddress.getLocalHost.getHostAddress, PingPongActor.DEFAULT_REMOTE_PORT)))), PingPongActor.PING_PONG_ACTOR_NAME)
+  actorSystem.actorOf(Props[PingPongActor].withDeploy(Deploy(scope = RemoteScope(Address("akka", ACTOR_SYSTEM_NAME, host, PingPongActor.DEFAULT_REMOTE_PORT)))), PingPongActor.PING_PONG_ACTOR_NAME)
 
   actorSystem.actorOf(Props[NetworkGreetActor])
   //println(adressRegistry.toString)

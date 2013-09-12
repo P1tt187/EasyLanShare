@@ -39,30 +39,33 @@ class PingPongActor extends Actor {
   def receive = {
     case NextStep =>
       Thread.sleep(TimeUnit.MINUTES.toMillis(1))
+      log.debug("ask for adresses")
       Await.result(actorRegisty ? (Adresses), timeout.duration) match {
-        case Adresses(adresses) => adresses.par.foreach {
-          element =>
-            val ipAdress = element.getHostName()
+        case Adresses(adresses) =>
+          log.debug("got adresses " + adresses)
+          adresses.par.foreach {
+            element =>
+              val ipAdress = element.getHostName()
 
-            val lookup = "akka://" +
-              EasyLanShareApp.ACTOR_SYSTEM_NAME + "@" + ipAdress + ":" +
-              PingPongActor.DEFAULT_REMOTE_PORT + "/user/" + PingPongActor.PING_PONG_ACTOR_NAME
+              val lookup = "akka://" +
+                EasyLanShareApp.ACTOR_SYSTEM_NAME + "@" + ipAdress + ":" +
+                PingPongActor.DEFAULT_REMOTE_PORT + "/user/" + PingPongActor.PING_PONG_ACTOR_NAME
 
-            log.debug(lookup)
+              log.debug(lookup)
 
-            val selection = context.actorFor(lookup)
-            try {
-              Await.result(selection ? Ping, timeout.duration) match {
-                case Pong =>
+              val selection = context.actorFor(lookup)
+              try {
+                Await.result(selection ? Ping, timeout.duration) match {
+                  case Pong =>
+
+                }
+              } catch {
+                case t: TimeoutException =>
+                  log.debug("Timeout for " + t.getMessage())
+                  actorRegisty ! RemoveAdress(element)
 
               }
-            } catch {
-              case t: TimeoutException =>
-                log.debug("Timeout for " + t.getMessage())
-                actorRegisty ! RemoveAdress(element)
-               
-            }
-        }
+          }
         case Timeout => log.error("uh oh, timeout")
       }
       self ! NextStep
