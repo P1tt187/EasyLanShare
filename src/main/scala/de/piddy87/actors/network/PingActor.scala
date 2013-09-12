@@ -8,9 +8,9 @@ import akka.event.Logging
 import akka.pattern.ask
 import akka.util.Timeout
 import de.piddy87.actors.messages.{Adresses,Ping,Pong,RemoveAdress}
-
 import de.piddy87.main.EasyLanShareApp
 import java.util.concurrent.TimeoutException
+import java.net.ConnectException
 /**
  * @author fabian
  * This class looks, if a host is lost
@@ -53,9 +53,11 @@ class PingActor extends Actor {
               }
             } catch {
               case t: TimeoutException =>
-                log.debug("Timeout for " + t.getMessage())
+                log.error("Timeout for " + t.getMessage())
                 actorRegisty ! RemoveAdress(element)
-
+              case e: ConnectException =>
+                log.error("unable to connect to" + e.getMessage())
+                actorRegisty ! RemoveAdress(element)
             }
           }
         case Timeout => log.error("uh oh, timeout")
